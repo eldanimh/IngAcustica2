@@ -144,17 +144,9 @@
 
         /* --- MAGIC CSS PARA PDF VECTORIAL --- */
         @media print {
-            /* Ocultar todo lo que no sea el informe */
-            body * {
-                visibility: hidden;
-            }
+            body * { visibility: hidden; }
+            #report-section, #report-section * { visibility: visible; }
             
-            /* Hacer visible solo el área del informe y sus hijos */
-            #report-section, #report-section * {
-                visibility: visible;
-            }
-
-            /* Posicionar el informe en la esquina superior izquierda del papel */
             #report-section {
                 position: absolute;
                 left: 0;
@@ -167,16 +159,13 @@
                 display: block !important;
             }
 
-            /* Evitar cortes feos en la tabla */
             tr { page-break-inside: avoid; }
             
-            /* Asegurar colores de fondo en la impresión (para celdas grises) */
             * {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
 
-            /* Ocultar botones dentro del informe si los hubiera */
             .no-print { display: none !important; }
         }
     </style>
@@ -235,8 +224,7 @@
 
         <div class="summary-box">
             <h4>Parámetros de Evaluación</h4>
-            <ul id="params-list">
-                </ul>
+            <ul id="params-list"></ul>
         </div>
 
         <h4>Resultados de Medición</h4>
@@ -252,28 +240,25 @@
                     <th>Serie 1</th><th>Serie 2</th><th>Serie 3</th>
                 </tr>
             </thead>
-            <tbody id="table-body">
-                </tbody>
+            <tbody id="table-body"></tbody>
         </table>
 
-        <div id="verdict-box">
-            </div>
+        <div id="verdict-box"></div>
 
         <div class="legal-footer">
             <strong>NOTA TÉCNICA Y LEGAL:</strong>
             <p>
-                1. [cite_start]<strong>Cálculo:</strong> Se ha calculado el nivel sonoro resultante a partir de la media logarítmica de las series realizadas en cada punto, según lo establecido en el Anexo IV del RD 1367/2007 para infraestructuras [cite: 540-542].
+                1. <strong>Cálculo:</strong> Se ha calculado el nivel sonoro resultante a partir de la media logarítmica de las series realizadas en cada punto, según lo establecido en el Anexo IV del RD 1367/2007 para infraestructuras.
                 <br>
-                2. [cite_start]<strong>Redondeo:</strong> El valor final de cada punto ha sido redondeado incrementándolo en 0,5 dB(A) y tomando la parte entera, conforme al procedimiento de evaluación descrito en el Anexo IV, apartado 3.4.2[cite: 547].
+                2. <strong>Redondeo:</strong> El valor final de cada punto ha sido redondeado incrementándolo en 0,5 dB(A) y tomando la parte entera, conforme al procedimiento de evaluación descrito en el Anexo IV, apartado 3.4.2.
                 <br>
-                3. [cite_start]<strong>Criterio de Conformidad:</strong> De acuerdo con el Artículo 25.1.a.ii del RD 1367/2007 [cite: 243][cite_start], se considera que se respetan los valores límite cuando ningún valor diario supera en 3 dB los valores fijados en la Tabla A1 del Anexo III[cite: 459].
+                3. <strong>Criterio de Conformidad:</strong> De acuerdo con el Artículo 25.1.a.ii del RD 1367/2007, se considera que se respetan los valores límite cuando ningún valor diario supera en 3 dB los valores fijados en la Tabla A1 del Anexo III.
             </p>
         </div>
     </div>
 </div>
 
 <script>
-    // Configuración Límites (RD 1367/2007, Anexo III, Tabla A1)
     const limits = {
         'e': { Ld: 55, Le: 55, Ln: 45, name: 'Área Tipo e (Sanitario/Docente)' },
         'a': { Ld: 60, Le: 60, Ln: 50, name: 'Área Tipo a (Residencial)' },
@@ -284,7 +269,6 @@
 
     let pCount = 0;
 
-    // Inicializar
     window.onload = function() {
         addPoint(); addPoint(); addPoint();
     };
@@ -304,7 +288,6 @@
         document.getElementById('points-container').appendChild(div);
     }
 
-    // Media Logarítmica
     function calcLogAvg(arr) {
         let sum = 0;
         arr.forEach(v => sum += Math.pow(10, v/10));
@@ -315,7 +298,7 @@
         const type = document.getElementById('areaSelect').value;
         const period = document.getElementById('periodSelect').value;
         const limitBase = limits[type][period];
-        const limitMax = limitBase + 3; // Art 25.1.a.ii (+3dB tolerancia diaria)
+        const limitMax = limitBase + 3; 
 
         const points = document.getElementsByClassName('point-card');
         const tbody = document.getElementById('table-body');
@@ -324,7 +307,6 @@
         let maxValFound = -Infinity;
         let valid = true;
 
-        // Procesar puntos
         Array.from(points).forEach((pt, idx) => {
             const inputs = pt.querySelectorAll('.val');
             const vals = [];
@@ -335,14 +317,11 @@
             });
 
             if(valid) {
-                // Cálculo Anexo IV
                 const avg = calcLogAvg(vals);
-                // Redondeo: Parte entera de (Valor + 0.5)
                 const rounded = Math.floor(avg + 0.5);
 
                 if(rounded > maxValFound) maxValFound = rounded;
 
-                // Fila Tabla
                 const tr = `
                     <tr>
                         <td><strong>Punto ${idx+1}</strong></td>
@@ -362,7 +341,6 @@
             return;
         }
 
-        // Rellenar Informe
         document.getElementById('report-date').innerText = new Date().toLocaleString();
         
         const paramsList = document.getElementById('params-list');
@@ -380,11 +358,9 @@
             verdictBox.innerHTML = `<div class="verdict fail">❌ NO CONFORME<br><span style="font-size:14px; font-weight:normal">El valor máximo evaluado (${maxValFound} dBA) SUPERA el límite de tolerancia (${limitMax} dBA).</span></div>`;
         }
 
-        // Mostrar sección y botón imprimir
         document.getElementById('report-section').style.display = 'block';
         document.getElementById('btn-print').style.display = 'inline-block';
         
-        // Scroll al informe
         document.getElementById('report-section').scrollIntoView({behavior: 'smooth'});
     }
 </script>
