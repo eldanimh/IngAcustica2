@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Conformidad RD 1367/2007 - Tabla A1</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --border: #ddd;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header { text-align: center; margin-bottom: 30px; }
+        h1 { color: var(--primary); margin-bottom: 5px; }
+        p.subtitle { color: #666; font-size: 0.9em; margin-top: 0; }
+
+        /* Controles */
+        .controls {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        /* Área de Puntos */
+        #points-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .point-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-left: 5px solid var(--accent);
+            padding: 15px;
+            border-radius: 4px;
+        }
+
+        .inputs-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 5px;
+        }
+
+        /* Botones */
+        .actions { text-align: center; margin-bottom: 20px; }
+        button {
+            padding: 12px 24px;
+            font-size: 1em;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin: 5px;
+        }
+        .btn-add { background-color: #95a5a6; color: white; }
+        .btn-calc { background-color: var(--accent); color: white; font-weight: bold; }
+        .btn-pdf { background-color: #e74c3c; color: white; display: none; } /* Oculto por defecto */
+        button:hover { opacity: 0.9; }
+
+        /* Estilos del Informe (Visible en web y PDF) */
+        #report-area {
+            display: none;
+            background: white;
+            padding: 40px;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            margin-top: 30px;
+        }
+
+        .report-header {
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .report-title { font-size: 1.5em; font-weight: bold; color: var(--primary); }
+        .report-meta { font-size: 0.8em; color: #666; text-align: right; }
+
+        .summary-box {
+            background-color: #f8f9fa;
+            border: 1px solid #eee;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+        .result-table th, .result-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        .result-table th { background-color: #f2f2f2; color: #333; }
+        .col-left { text-align: left !important; }
+
+        .final-verdict {
+            text-align: center;
+            padding: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+        .pass { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .fail { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        .legal-footer {
+            margin-top: 30px;
+            font-size: 0.75em;
+            color: #777;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+
+        /* Ocultar elementos irrelevantes al generar PDF */
+        .pdf-hide { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Verificación RD 1367/2007</h1>
+        <p class="subtitle">Calculadora de conformidad de Inmisión (Tabla A1)</p>
+    </header>
+
+    <div class="controls" data-html2canvas-ignore="true">
+        <div>
+            <label for="areaSelect">1. Tipo de Área Acústica (Tabla A1)</label>
+            <select id="areaSelect">
+                <option value="e">e - Sanitario, docente y cultural</option>
+                <option value="a">a - Residencial</option>
+                <option value="d">d - Terciario (distinto de c)</option>
+                <option value="c">c - Recreativo y espectáculos</option>
+                <option value="b">b - Industrial</option>
+            </select>
+        </div>
+        <div>
+            <label for="periodSelect">2. Índice de Ruido (Periodo)</label>
+            <select id="periodSelect">
+                <option value="Ld">Ld (Día: 12h)</option>
+                <option value="Le">Le (Tarde: 4h)</option>
+                <option value="Ln">Ln (Noche: 8h)</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="points-container" data-html2canvas-ignore="true">
+        </div>
+
+    <div class="actions" data-html2canvas-ignore="true">
+        <button class="btn-add" onclick="addPoint()">+ Añadir Punto</button>
+        <button class="btn-calc" onclick="calculateCompliance()">Calcular Resultado</button>
+        <button id="btn-pdf" class="btn-pdf" onclick="generatePDF()">📄 Descargar Informe PDF</button>
+    </div>
+
+    <div id="report-area">
+        </div>
+
+</div>
+
+<script>
+    // --- 1. Datos y Configuración ---
+    const limitsTableA1 = {
+        'e': { 'Ld': 55, 'Le': 55, 'Ln': 45, 'name': 'Uso sanitario, docente y cultural (Tipo e)' },
+        'a': { 'Ld': 60, 'Le': 60, 'Ln': 50, 'name': 'Uso residencial (Tipo a)' },
+        'd': { 'Ld': 65, 'Le': 65, 'Ln': 55, 'name': 'Uso terciario (Tipo d)' },
+        'c': { 'Ld': 68, 'Le': 68, 'Ln': 58, 'name': 'Uso recreativo/espectáculos (Tipo c)' },
+        'b': { 'Ld': 70, 'Le': 70, 'Ln': 60, 'name': 'Uso industrial (Tipo b)' }
+    };
+
+    let pointCount = 0;
+
+    // --- 2. Inicialización ---
+    document.addEventListener('DOMContentLoaded', () => {
+        addPoint(); addPoint(); addPoint(); // Mínimo 3 puntos
+    });
+
+    function addPoint() {
+        pointCount++;
+        const container = document.getElementById('points-container');
+        const card = document.createElement('div');
+        card.className = 'point-card';
+        card.innerHTML = `
+            <h3>Punto ${pointCount}</h3>
+            <div class="inputs-row">
+                <input type="number" step="0.1" placeholder="Serie 1 (dB)" class="med-val" required>
+                <input type="number" step="0.1" placeholder="Serie 2 (dB)" class="med-val" required>
+                <input type="number" step="0.1" placeholder="Serie 3 (dB)" class="med-val" required>
+            </div>
+        `;
+        container.appendChild(card);
+    }
+
+    // --- 3. Matemática (RD 1367/2007) ---
+    function logAverage(values) {
+        let sum = 0;
+        values.forEach(v => sum += Math.pow(10, v / 10));
+        return 10 * Math.log10(sum / values.length);
+    }
+
+    // --- 4. Cálculo y Generación de HTML para el Informe ---
+    function calculateCompliance() {
+        const areaKey = document.getElementById('areaSelect').value;
+        const period = document.getElementById('periodSelect').value;
+        const areaData = limitsTableA1[areaKey];
+        const baseLimit = areaData[period];
+        
+        const pointCards = document.querySelectorAll('.point-card');
+        
+        // Validación básica
+        let valid = true;
+        let pointsData = [];
+
+        pointCards.forEach((card, index) => {
+            const inputs = card.querySelectorAll('.med-val');
+            const vals = [];
+            inputs.forEach(inp => {
+                if(inp.value === "") valid = false;
+                vals.push(parseFloat(inp.value));
+            });
+            
+            if(valid) {
+                // Cálculo Media Logarítmica
+                const avg = logAverage(vals);
+                // Redondeo RD 1367/2007: Parte entera de (Valor + 0.5)
+                const rounded = Math.floor(avg + 0.5);
+                
+                pointsData.push({
+                    id: index + 1,
+                    vals: vals,
+                    avg: avg.toFixed(1),
+                    rounded: rounded
+                });
+            }
+        });
+
+        if (!valid) {
+            alert("Por favor, introduce todos los valores de medición.");
+            return;
+        }
+
+        // Determinar el "Punto Peor" (Máximo valor)
+        // Fuente: Art 25.1.a.ii (evaluación diaria)
+        const maxVal = Math.max(...pointsData.map(p => p.rounded));
+        const limitWithTolerance = baseLimit + 3; // Margen de +3dB
+        const isCompliant = maxVal <= limitWithTolerance;
+
+        // --- Generar HTML del Informe ---
+        const reportArea = document.getElementById('report-area');
+        const dateStr = new Date().toLocaleString('es-ES');
+
+        let rowsHTML = pointsData.map(p => `
+            <tr>
+                <td>Punto ${p.id}</td>
+                <td>${p.vals[0]}</td>
+                <td>${p.vals[1]}</td>
+                <td>${p.vals[2]}</td>
+                <td>${p.avg}</td>
+                <td style="font-weight:bold; background:#f9f9f9;">${p.rounded}</td>
+            </tr>
+        `).join('');
+
+        const verdictHTML = isCompliant 
+            ? `<div class="final-verdict pass">✅ CONFORME<br><span style="font-size:0.8em; font-weight:normal">El valor máximo (${maxVal} dBA) no supera el límite de tolerancia (${limitWithTolerance} dBA).</span></div>`
+            : `<div class="final-verdict fail">❌ NO CONFORME<br><span style="font-size:0.8em; font-weight:normal">El valor máximo (${maxVal} dBA) excede el límite de tolerancia (${limitWithTolerance} dBA).</span></div>`;
+
+        reportArea.innerHTML = `
+            <div class="report-header">
+                <div class="report-title">Informe de Ensayo Acústico</div>
+                <div class="report-meta">Fecha: ${dateStr}<br>Ref: RD 1367/2007</div>
+            </div>
+
+            <div class="summary-box">
+                <strong>Parámetros de Evaluación:</strong>
+                <ul>
+                    <li><strong>Área Acústica:</strong> ${areaData.name}</li>
+                    <li><strong>Índice Evaluado:</strong> ${period}</li>
+                    <li><strong>Límite Tabla A1:</strong> ${baseLimit} dBA [cite: 461]</li>
+                    <li><strong>Criterio Superación (Art. 25):</strong> +3 dBA permitido (Total: ${limitWithTolerance} dBA) </li>
+                </ul>
+            </div>
+
+            <h3>Detalle de Mediciones</h3>
+            <table class="result-table">
+                <thead>
+                    <tr>
+                        <th rowspan="2">ID Punto</th>
+                        <th colspan="3">Series (dBA) [cite: 539]</th>
+                        <th rowspan="2">Media Log.<br>(Leq)</th>
+                        <th rowspan="2">Valor Eval.<br>(Redondeado)</th>
+                    </tr>
+                    <tr>
+                        <th>S1</th><th>S2</th><th>S3</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rowsHTML}
+                </tbody>
+            </table>
+
+            <div style="text-align:right; margin-bottom:10px;">
+                <strong>Valor más desfavorable: ${maxVal} dBA</strong>
+            </div>
+
+            ${verdictHTML}
+
+            <div class="legal-footer">
+                <strong>Nota Técnica:</strong><br>
+                1. <em>Media Logarítmica:</em> Calculada según procedimiento del Anexo IV para evaluación de infraestructuras.<br>
+                2. <em>Redondeo:</em> Se aplica incremento de 0.5 dB y parte entera conforme al Anexo IV, apdo 3.4.2.a[cite: 547].<br>
+                3. <em>Conformidad:</em> Se verifica que ningún valor diario supere en 3 dB el valor de la tabla A1 (Art. 25.1.a.ii).
+            </div>
+        `;
+
+        // Mostrar informe y botón PDF
+        reportArea.style.display = 'block';
+        document.getElementById('btn-pdf').style.display = 'inline-block';
+        
+        // Scroll suave hacia el resultado
+        reportArea.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // --- 5. Exportar a PDF ---
+    function generatePDF() {
+        const element = document.getElementById('report-area');
+        
+        // Configuración de html2pdf
+        const opt = {
+            margin:       0.5, // márgenes en pulgadas
+            filename:     `Informe_Acustico_${new Date().toISOString().slice(0,10)}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 }, // Mayor escala para textos nítidos
+            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+
+        // Generar y guardar
+        html2pdf().set(opt).from(element).save();
+    }
+</script>
+
+</body>
+</html>
